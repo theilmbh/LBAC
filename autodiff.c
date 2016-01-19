@@ -45,15 +45,37 @@ void term()
 
 void func()
 {
-
+	match_token(IDENTIFIER);
+	match_token(RBRACK);
+	if (lookahead->t_type == PERCENT) {
+		var();
+	} else {
+		func();
+	}
+	match_token(LBRACK);
 }
 
 void var()
 {
-
+	match_token(PERCENT);
+	match_token(IDENTIFIER);
 }
 
 void d_op()
 {
+	match_token(D_D);
+	var();
+}
 
+void deriv_expr()
+{
+	d_op();
+	match_token(RBRACK);
+	if (lookahead->t_type == IDENTIFIER) {
+		func();
+		printf('')
+	} else {
+		expr();
+	}
+	match_token(LBRACK);
 }

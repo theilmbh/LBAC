@@ -40,7 +40,17 @@ void expr()
 
 void term()
 {
-
+	if (lookahead->t_type == RPAREN) {
+		match_token(RPAREN);
+		expr();
+		match_token(LPAREN);
+	} else if (lookahead->t_type == D_D) {
+		deriv_expr;
+	} else if (lookahead->t_type == IDENTIFIER) {
+		func();
+	} else {
+		break;
+	}
 }
 
 void func()
@@ -98,6 +108,7 @@ void get_next_token(struct token *t)
 
 int main()
 {
+	lookahead = malloc(sizeof(struct token));
 	expr();
 	putc('\n', stdout);
 }

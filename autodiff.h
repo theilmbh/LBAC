@@ -16,6 +16,7 @@ typedef int token_type_t;
 
 struct token {
 	token_type_t t_type;
+	char symbol;
 	/* union of attributes */
 };
 
@@ -31,3 +32,7 @@ token_type_t token_types[N_TOKENS] = {
 	D_D,
 	PERCENT
 };
+
+struct parse_tree_node {
+	struct token tk;
+}

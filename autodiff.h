@@ -17,4 +17,17 @@ typedef int token_type_t;
 struct token {
 	token_type_t t_type;
 	/* union of attributes */
-}
+};
+
+#define N_TOKENS 8
+char token_str[N_TOKENS] = {'+', '-', '[', ']', '(', ')', 'd', '%'};
+token_type_t token_types[N_TOKENS] = {
+	PLUS_OPERATOR,
+	MINUS_OPERATOR,
+	RBRACK,
+	LBRACK,
+	RPAREN,
+	LPAREN,
+	D_D,
+	PERCENT
+};

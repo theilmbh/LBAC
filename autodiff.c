@@ -79,3 +79,25 @@ void deriv_expr()
 	}
 	match_token(LBRACK);
 }
+
+void get_next_token(struct token *t)
+{
+	
+	char b;
+	int i;
+	b = getc(stdin);
+	for(i=0; i<N_TOKENS; i++) {
+		if (b == token_str[i]) {
+			t->t_type = token_types[i];
+		} else {
+			t->t_type = IDENTIFIER;
+		}
+	}
+	
+}
+
+int main()
+{
+	expr();
+	putc('\n', stdout);
+}

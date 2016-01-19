@@ -1,6 +1,7 @@
 /* autodiff.h */
 /* Token types, data structures, etc */
-
+#ifndef autodiff_h
+#define autodiff_h 
 /* token types */
 #define PLUS_OPERATOR 1
 #define MINUS_OPERATOR 2
@@ -35,4 +36,5 @@ token_type_t token_types[N_TOKENS] = {
 
 struct parse_tree_node {
 	struct token tk;
-}
+};
+#endif

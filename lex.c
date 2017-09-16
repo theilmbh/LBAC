@@ -2,19 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-typedef enum token_t {INTEGER, OP, ENDA} token_t;
-typedef enum op_t {PLUS, MULTIPLY} op_t;
-
-typedef union val_t {
-  int int_val;
-  op_t op;
-} val_t;
-
-typedef struct Token {
-
-  token_t type;
-  val_t val;
-} Token;
+#include "cmplr.h"
 
 void print_token(Token *tok)
 {
@@ -70,13 +58,4 @@ void read_one_token(Token *tok)
   }
 
   printf("Lexing Error!\n");
-}
-
-int main() {
-  Token tok;
-  while(1) {
-    read_one_token(&tok);
-    print_token(&tok);
-  }
-  return 0;
 }

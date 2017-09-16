@@ -51,6 +51,41 @@ void read_one_token(Token *tok)
     return;
   }
 
+  if(ch == '-') {
+    tok->type = OP;
+    tok->val.op = MINUS;
+    return;
+  }
+
+  if(ch == '/') {
+    tok->type = OP;
+    tok->val.op = DIVIDE;
+    return;
+  }
+
+  if(ch == '(') {
+    tok->type = L_PAREN;
+    return;
+  }
+
+  if(ch == ')') {
+    tok->type = R_PAREN;
+    return;
+  }
+
+  if(isalpha(ch)) {
+    int ind = 0;
+    tok->type = IDENT;
+    tok->val.ident[ind] = ch;
+    while(isalpha(ch=getc(stdin))) {
+      ind +=1;
+      tok->val.ident[ind] = ch;
+    }
+    ungetc(ch, stdin);
+    tok->val.ident[ind+1] = '\0';
+    return;
+  }
+
   if(ch == EOF) {
     printf("End of file?\n");
     tok->type = ENDA;

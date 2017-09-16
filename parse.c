@@ -17,7 +17,6 @@ void match(token_t type) {
 }
 
 Node *plus_node(Node *l, Node *r) {
-
   Node *out = malloc(sizeof(Node));
   out->type = BIN_OP_PLUS;
   out->value = 0;
@@ -27,7 +26,6 @@ Node *plus_node(Node *l, Node *r) {
 }
 
 Node *minus_node(Node *l, Node *r) {
-
   Node *out = malloc(sizeof(Node));
   out->type = BIN_OP_MINUS;
   out->value = 0;
@@ -37,7 +35,6 @@ Node *minus_node(Node *l, Node *r) {
 }
 
 Node *times_node(Node *l, Node *r) {
-
   Node *out = malloc(sizeof(Node));
   out->type = BIN_OP_TIMES;
   out->value = 0;
@@ -47,7 +44,6 @@ Node *times_node(Node *l, Node *r) {
 }
 
 Node *divide_node(Node *l, Node *r) {
-
   Node *out = malloc(sizeof(Node));
   out->type = BIN_OP_DIVIDE;
   out->value = 0;
@@ -57,7 +53,6 @@ Node *divide_node(Node *l, Node *r) {
 }
 
 Node *integer_node(int val) {
-
   Node *out = malloc(sizeof(Node));
   out->type = INT;
   out->value = val;
@@ -78,34 +73,44 @@ Node *var_node(char *var_name) {
 Node *factor() {
   // printf("factor\n");
   Node *out = NULL;
+  /* Just a plain integer */
   if(tok->type == INTEGER) {
     out = integer_node(tok->val.int_val);
     match(INTEGER);
     return out;
-  } else if(tok->type == L_PAREN) {
+  } else if (tok->type == L_PAREN) {
+      /* parenthetical expression */
       match(L_PAREN);
       out = expression();
       match(R_PAREN);
       return out;
   } else if(tok->type == IDENT) {
+    /* Variable */
     out = var_node(tok->val.ident);
     match(IDENT);
     return out;
   } else {
+    /* IDK what we got */
     printf("Syntax Error\n");
     return NULL;
   }
 }
 
 Node *term() {
-  // printf("Term\n");
+  /* parse a term */
   Node *out = NULL;
+
+  /* First, parse any factors */
   out = factor();
+
+  /* Times operation */
   if(tok->type == OP && tok->val.op == MULTIPLY) {
     match(OP);
     out = times_node(out, term());
     return out;
   }
+
+  /* Divide operation */
   if(tok->type == OP && tok->val.op == DIVIDE) {
     match(OP);
     out = divide_node(out, term());
@@ -115,15 +120,20 @@ Node *term() {
 }
 
 Node *expression() {
-  // printf("Expression\n");
+
+  /* Parse an expression */
   Node *out = NULL;
   Node *ph = NULL;
   ph = term();
+
+  /* Plus operation */
   if(tok->type == OP && tok->val.op == PLUS) {
     match(OP);
     out = plus_node(ph, expression());
     return out;
   }
+
+  /* Minus Operation */
   if(tok->type == OP && tok->val.op == MINUS) {
     match(OP);
     out = minus_node(ph, expression());
@@ -137,7 +147,11 @@ Node *parse()
   Node *ast;
   Token mytok;
   tok = &mytok;
+
+  /* Load the lookahead with the first token */
   read_one_token(tok);
+
+  /* Let's go! */
   ast = expression();
   return ast;
 }
@@ -171,6 +185,9 @@ Node *expand(Node *ast) {
 }
 
 void print_expression(Node *ast) {
+
+  /* If it's an operator, print the left side,
+     then the operator, then the right side */
   if (ast->type != INT && ast->type != VAR) {
     print_expression(ast->left);
     switch(ast->type) {
@@ -183,6 +200,8 @@ void print_expression(Node *ast) {
     }
     print_expression(ast->right);
   }
+
+  /* Otherwise just print the value */
   if(ast->type == INT) {
     printf("%d", ast->value);
   }

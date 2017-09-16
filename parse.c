@@ -14,7 +14,6 @@ void match(token_t type) {
     printf("Syntax Error\n");
     exit(-1);
   }
-
 }
 
 Node *plus_node(Node *l, Node *r) {
@@ -143,6 +142,56 @@ Node *parse()
   return ast;
 }
 
+Node *expand(Node *ast) {
+
+  Node *out, *al;
+  /* If node is add, expand children */
+  if (ast->type == BIN_OP_PLUS || ast->type == BIN_OP_MINUS) {
+    ast->left = expand(ast->left);
+    ast->right = expand(ast->right);
+    return ast;
+  }
+
+  /* if node is multiply, rewrite */
+  if (ast->type == BIN_OP_TIMES) {
+    if (ast->right->type == BIN_OP_PLUS) {
+      al = expand(ast->left);
+      out = plus_node(expand(times_node(al, expand(ast->right->left))),
+                      expand(times_node(al, expand(ast->right->right))));
+      return out;
+    }
+    if (ast->left->type == BIN_OP_PLUS) {
+      al = expand(ast->right);
+      out = plus_node(expand(times_node(expand(ast->left->left), al)),
+                      expand(times_node(expand(ast->left->right), al)));
+      return out;
+    }
+  }
+  return ast;
+}
+
+void print_expression(Node *ast) {
+  if (ast->type != INT && ast->type != VAR) {
+    print_expression(ast->left);
+    switch(ast->type) {
+      case BIN_OP_TIMES:
+        printf("*");
+        break;
+      case BIN_OP_PLUS:
+        printf(" + ");
+        break;
+    }
+    print_expression(ast->right);
+  }
+  if(ast->type == INT) {
+    printf("%d", ast->value);
+  }
+  if(ast->type == VAR) {
+    printf("%s", ast->name);
+  }
+
+}
+
 void print_node(Node *n, int indent) {
   // for(int i=0; i<indent; i++) {
   //   printf(" ");
@@ -189,7 +238,13 @@ void print_ast(Node *n, int indent) {
 }
 
 int main() {
+  Node *ast = parse();
+  // print_ast(ast, 0);
+  ast = expand(ast);
+  // printf("Expanded: \n");
+  // print_ast(ast, 0);
+  print_expression(ast);
+  printf("\n");
 
-  print_ast(parse(), 0);
   return 0;
 }

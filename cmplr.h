@@ -36,7 +36,6 @@ typedef struct Node {
   struct Node *right;
 } Node;
 
-
 void read_one_token(Token *tok);
 void print_token(Token *tok);
 

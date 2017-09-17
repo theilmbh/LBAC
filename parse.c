@@ -156,9 +156,52 @@ Node *parse()
   return ast;
 }
 
+Node *rewrite_minus(Node *ast) {
+  /* Rewrite a - b as a + -1*b */
+  if(ast->type == INT || ast->type == VAR) {
+    return ast;
+  }
+
+  if(ast->type == BIN_OP_MINUS) {
+    return plus_node(rewrite_minus(ast->left),
+                     times_node(integer_node(-1), rewrite_minus(ast->right)));
+  }
+  else {
+    ast->left = rewrite_minus(ast->left);
+    ast->right = rewrite_minus(ast->right);
+    return ast;
+  }
+}
+
+Node *reorder_coeff(Node *ast) {
+  /* Reorders coefficients so that integers are on left */
+  Node *tmp;
+  if(ast->type == INT || ast->type == VAR) {
+    return ast;
+  }
+
+  if(ast->type == BIN_OP_TIMES
+     && ast->right->type == INT
+     && ast->left->type != INT) {
+       tmp = reorder_coeff(ast->left);
+       ast->left = ast->right;
+       ast->right = tmp;
+       return ast;
+     }
+  ast->left = reorder_coeff(ast->left);
+  ast->right = reorder_coeff(ast->right);
+  return ast;
+}
+
 Node *expand(Node *ast) {
 
   Node *out, *al;
+
+  /* if node is int or var, just return it */
+  if (ast->type == VAR || ast->type == INT) {
+    return ast;
+  }
+
   /* If node is add, expand children */
   if (ast->type == BIN_OP_PLUS || ast->type == BIN_OP_MINUS) {
     ast->left = expand(ast->left);
@@ -180,7 +223,20 @@ Node *expand(Node *ast) {
                       expand(times_node(expand(ast->left->right), al)));
       return out;
     }
+
+    /* Expand Children */
+    ast->left = expand(ast->left);
+    ast->right = expand(ast->right);
+
+    /* check to see if we can distribute further */
+    if (ast->left->type == BIN_OP_PLUS || ast->right->type == BIN_OP_PLUS) {
+      return expand(ast);
+    }
+    /* return expanded node */
+    return ast;
   }
+
+  /* fall through */
   return ast;
 }
 
@@ -196,6 +252,9 @@ void print_expression(Node *ast) {
         break;
       case BIN_OP_PLUS:
         printf(" + ");
+        break;
+      case BIN_OP_MINUS:
+        printf(" - ");
         break;
     }
     print_expression(ast->right);
@@ -258,10 +317,22 @@ void print_ast(Node *n, int indent) {
 
 int main() {
   Node *ast = parse();
-  // print_ast(ast, 0);
+
+  printf("Original: \n");
+  print_ast(ast, 0);
+
+  printf("Rewrite Minus: \n");
+  ast = rewrite_minus(ast);
+  print_ast(ast, 0);
+
+  printf("Expanded: \n");
   ast = expand(ast);
-  // printf("Expanded: \n");
-  // print_ast(ast, 0);
+  print_ast(ast, 0);
+
+  printf("Reorder coeff: \n");
+  ast = reorder_coeff(ast);
+  print_ast(ast, 0);
+  
   print_expression(ast);
   printf("\n");
 

@@ -1,5 +1,14 @@
-E -> T + E  | T
-T -> F * T
-T -> F
+statement -> assignment statement | expression
+expression -> term + expression  | term - expression | term
+term -> factor * term | factor / term | factor
+factor -> integer | variable | "(" expression ")"
 
-F = integer
+assignment -> "int" variable ":=" expression ";" {add var to symtab}
+
+evaluate(ast)
+
+1 + 2 + 3
+
+1, 2 +
+
+a+(b-c*(d+g)*(f-k)) - r

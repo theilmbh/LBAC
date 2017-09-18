@@ -69,6 +69,14 @@ void add_symbol(Node * var, Node * expr)
 }
 
 /* ABSTRACT SYNTAX TREE FUNCTIONS */
+
+/* Negate a node
+ * by multiplying by -1 */
+Node *negate(Node * n)
+{
+    return times_node(integer_node(-1), n);
+}
+
 Node *plus_node(Node * l, Node * r)
 {
     Node *out = malloc(sizeof(Node));
@@ -79,7 +87,7 @@ Node *plus_node(Node * l, Node * r)
     return out;
 }
 
-Node *minus_node(Node * l, Node * r)
+/* Node *minus_node(Node * l, Node * r)
 {
     Node *out = malloc(sizeof(Node));
     out->type = BIN_OP_MINUS;
@@ -87,6 +95,15 @@ Node *minus_node(Node * l, Node * r)
     out->left = l;
     out->right = r;
     return out;
+}*/
+
+Node *minus_node(Node * l, Node * r)
+{
+    if (r->type == BIN_OP_PLUS || r->type == BIN_OP_MINUS ) {
+        return plus_node(l, plus_node(negate(r->left), r->right));
+    } else {
+        return plus_node(l, negate(r));
+    }
 }
 
 Node *times_node(Node * l, Node * r)

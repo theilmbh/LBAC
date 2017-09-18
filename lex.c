@@ -1,6 +1,7 @@
 #include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "cmplr.h"
 
@@ -16,6 +17,15 @@ void print_token(Token *tok)
       break;
     case ENDA:
       printf("END\n");
+      break;
+    case KW_INT:
+      printf("Keyword int\n");
+      break;
+    case SEMICOLON:
+      printf("Semicolon\n");
+      break;
+    case ASSIGN_OP:
+      printf("Assign Op\n");
       break;
   }
 }
@@ -73,6 +83,20 @@ void read_one_token(Token *tok)
     return;
   }
 
+  if(ch == ';') {
+    tok->type = SEMICOLON;
+    return;
+  }
+
+  if(ch == ':') {
+    if ((ch = getc(stdin)) == '=') {
+      tok->type = ASSIGN_OP;
+      return;
+    } else {
+      ungetc(ch, stdin);
+    }
+  }
+
   if(isalpha(ch)) {
     int ind = 0;
     tok->type = IDENT;
@@ -83,6 +107,10 @@ void read_one_token(Token *tok)
     }
     ungetc(ch, stdin);
     tok->val.ident[ind+1] = '\0';
+    // printf("Lex Ident: %s\n", tok->val.ident);
+    if (!strcmp(tok->val.ident, "int")) {
+      tok->type = KW_INT;
+    }
     return;
   }
 

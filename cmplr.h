@@ -2,8 +2,13 @@
 #define CMPLR_H
 
 #define MAXIDENT 256
+#define MAXSYM   256
 
-typedef enum token_t {INTEGER, OP, ENDA, L_PAREN, R_PAREN, IDENT} token_t;
+typedef enum token_t {
+  INTEGER, OP, ENDA,
+  L_PAREN, R_PAREN, IDENT,
+  KW_INT, SEMICOLON, ASSIGN_OP
+} token_t;
 typedef enum op_t {PLUS, MULTIPLY, MINUS, DIVIDE} op_t;
 
 typedef union val_t {
@@ -35,6 +40,14 @@ typedef struct Node {
   struct Node *left;
   struct Node *right;
 } Node;
+
+typedef struct Symbol {
+  char name[MAXIDENT];
+  Node *expr;
+} Symbol;
+
+Symbol *symtab[MAXSYM];
+
 
 void read_one_token(Token *tok);
 void print_token(Token *tok);

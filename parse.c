@@ -6,6 +6,7 @@
 #include "cmplr.h"
 
 Token *tok;
+int symcount = 0;
 
 void match(token_t type) {
   if(tok->type == type) {
@@ -14,6 +15,40 @@ void match(token_t type) {
     printf("Syntax Error\n");
     exit(-1);
   }
+}
+
+int check_symbol(char *nm) {
+  int i;
+  for (i=0; i<symcount; i++) {
+    if (!strcmp(symtab[i]->name, nm)) {
+      return 1;
+    }
+  }
+  return 0;
+}
+
+Symbol *find_symbol(Node *n) {
+  int i;
+  for (i=0; i<symcount; i++) {
+    if(!strcmp(symtab[i]->name, n->name)) {
+      return symtab[i];
+    }
+  }
+  printf("Error: Variable %s undeclared\n", n->name);
+  exit(-1);
+}
+
+void add_symbol(Node *var, Node *expr) {
+
+  if (check_symbol(var->name)) {
+    printf("Symbol %s already declared. Terminating.\n", var->name);
+    exit(-1);
+  }
+  Symbol *sym = malloc(sizeof(Symbol));
+  strcpy(sym->name, var->name);
+  sym->expr = expr;
+  symtab[symcount] = sym;
+  symcount++;
 }
 
 Node *plus_node(Node *l, Node *r) {
@@ -142,6 +177,32 @@ Node *expression() {
   return ph;
 }
 
+void assignment() {
+  printf("Assignment \n");
+  Node *var, *expr;
+  match(KW_INT);
+  if (tok->type == IDENT) {
+    var = var_node(tok->val.ident);
+    match(IDENT);
+    match(ASSIGN_OP);
+    expr = expression();
+    match(SEMICOLON);
+    add_symbol(var, expr);
+  }
+}
+
+Node *statement() {
+
+  Node *out = NULL;
+  if (tok->type == KW_INT) {
+    assignment();
+    out = statement();
+  } else {
+    out = expression();
+  }
+  return out;
+}
+
 Node *parse()
 {
   Node *ast;
@@ -150,9 +211,10 @@ Node *parse()
 
   /* Load the lookahead with the first token */
   read_one_token(tok);
+  // print_token(tok);
 
   /* Let's go! */
-  ast = expression();
+  ast = statement();
   return ast;
 }
 
@@ -240,6 +302,32 @@ Node *expand(Node *ast) {
   return ast;
 }
 
+int evaluate(Node *ast) {
+  /* evaluate an expression */
+  int v1;
+  if (ast->type == VAR) {
+    Symbol *sym = find_symbol(ast);
+    v1 = evaluate(sym->expr);
+  }
+
+  if (ast->type == INT) {
+    return ast->value;
+  }
+
+  switch (ast->type) {
+    case BIN_OP_PLUS:
+      v1 = evaluate(ast->left) + evaluate(ast->right);
+      break;
+    case BIN_OP_TIMES:
+      v1 = evaluate(ast->left) * evaluate(ast->right);
+      break;
+    case BIN_OP_MINUS:
+      v1 = evaluate(ast->left) - evaluate(ast->right);
+      break;
+  }
+  return v1;
+}
+
 void print_expression(Node *ast) {
 
   /* If it's an operator, print the left side,
@@ -317,24 +405,25 @@ void print_ast(Node *n, int indent) {
 
 int main() {
   Node *ast = parse();
-
-  printf("Original: \n");
-  print_ast(ast, 0);
-
-  printf("Rewrite Minus: \n");
-  ast = rewrite_minus(ast);
-  print_ast(ast, 0);
-
-  printf("Expanded: \n");
-  ast = expand(ast);
-  print_ast(ast, 0);
-
-  printf("Reorder coeff: \n");
-  ast = reorder_coeff(ast);
-  print_ast(ast, 0);
-  
-  print_expression(ast);
-  printf("\n");
+  int v = evaluate(ast);
+  printf("Expression evaluated to: %d\n", v);
+  // printf("Original: \n");
+  // print_ast(ast, 0);
+  //
+  // printf("Rewrite Minus: \n");
+  // ast = rewrite_minus(ast);
+  // print_ast(ast, 0);
+  //
+  // printf("Expanded: \n");
+  // ast = expand(ast);
+  // print_ast(ast, 0);
+  //
+  // printf("Reorder coeff: \n");
+  // ast = reorder_coeff(ast);
+  // print_ast(ast, 0);
+  //
+  // print_expression(ast);
+  // printf("\n");
 
   return 0;
 }

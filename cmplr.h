@@ -52,6 +52,11 @@ Symbol *symtab[MAXSYM];
 void read_one_token(Token * tok, FILE * f);
 void print_token(Token * tok);
 
+Node *plus_node(Node * l, Node * r);
+Node *times_node(Node * l, Node * r);
+Node *minus_node(Node * l, Node * r);
+Node *integer_node(int val);
+
 Node *factor();
 Node *expression();
 Node *term();

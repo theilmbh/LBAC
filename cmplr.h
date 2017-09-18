@@ -4,6 +4,8 @@
 #define MAXIDENT 256
 #define MAXSYM   256
 
+#include <stdio.h>
+
 typedef enum token_t {
   INTEGER, OP, ENDA,
   L_PAREN, R_PAREN, IDENT,
@@ -49,7 +51,7 @@ typedef struct Symbol {
 Symbol *symtab[MAXSYM];
 
 
-void read_one_token(Token *tok);
+void read_one_token(Token *tok, FILE *f);
 void print_token(Token *tok);
 
 Node *factor();

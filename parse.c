@@ -6,11 +6,13 @@
 #include "cmplr.h"
 
 Token *tok;
+FILE *source;
+
 int symcount = 0;
 
 void match(token_t type) {
   if(tok->type == type) {
-    read_one_token(tok);
+    read_one_token(tok, source);
   } else {
     printf("Syntax Error\n");
     exit(-1);
@@ -178,7 +180,6 @@ Node *expression() {
 }
 
 void assignment() {
-  printf("Assignment \n");
   Node *var, *expr;
   match(KW_INT);
   if (tok->type == IDENT) {
@@ -210,7 +211,7 @@ Node *parse()
   tok = &mytok;
 
   /* Load the lookahead with the first token */
-  read_one_token(tok);
+  read_one_token(tok, source);
   // print_token(tok);
 
   /* Let's go! */
@@ -358,57 +359,59 @@ void print_expression(Node *ast) {
 
 }
 
-void print_node(Node *n, int indent) {
+void print_node(FILE *out, Node *n, int indent) {
   // for(int i=0; i<indent; i++) {
   //   printf(" ");
   // }
   switch(n->type) {
     case BIN_OP_TIMES:
-      printf("P Multiply\n");
+      fprintf(out, "P Multiply\n");
       break;
     case BIN_OP_PLUS:
-      printf("P Add\n");
+      fprintf(out, "P Add\n");
       break;
     case BIN_OP_MINUS:
-      printf("P Minus\n");
+      fprintf(out, "P Minus\n");
       break;
     case BIN_OP_DIVIDE:
-      printf("P Divide\n");
+      fprintf(out, "P Divide\n");
       break;
     case INT:
-      printf("P Integer: %d\n", n->value);
+      fprintf(out, "P Integer: %d\n", n->value);
       break;
     case VAR:
-      printf("P Varible: %s\n", n->name);
+      fprintf(out, "P Varible: %s\n", n->name);
       break;
   }
 }
 
-void print_ast(Node *n, int indent) {
+void print_ast(FILE *out, Node *n, int indent) {
     int i;
-    print_node(n, indent);
+    print_node(out, n, indent);
     if(n->left != NULL) {
       for(i=0; i<indent; i++) {
-        printf(" ");
+        fprintf(out, " ");
       }
-      printf("|-> ");
-      print_ast(n->left, indent+4);
+      fprintf(out, "|-> ");
+      print_ast(out, n->left, indent+4);
     }
     if(n->right != NULL) {
       for(i=0; i<indent; i++) {
-        printf(" ");
+        fprintf(out, " ");
       }
-      printf("|-> ");
-      print_ast(n->right, indent+4);
+      fprintf(out, "|-> ");
+      print_ast(out, n->right, indent+4);
     }
 }
 
-int main() {
+int main(int argc, char **argv) {
+  source = fopen(argv[1], "r");
   Node *ast = parse();
   int v = evaluate(ast);
   printf("Expression evaluated to: %d\n", v);
-  // printf("Original: \n");
-  // print_ast(ast, 0);
+
+  FILE *out = fopen("./ast.tree", "w");
+  print_ast(out, ast, 0);
   //
   // printf("Rewrite Minus: \n");
   // ast = rewrite_minus(ast);

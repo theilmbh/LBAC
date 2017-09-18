@@ -30,22 +30,22 @@ void print_token(Token *tok)
   }
 }
 
-void read_one_token(Token *tok)
+void read_one_token(Token *tok, FILE *f)
 {
   int ch;
-  ch = getc(stdin);
+  ch = getc(f);
   while(isspace(ch)) {
-    ch = getc(stdin);
+    ch = getc(f);
   }
 
   /* Handle integer literal */
   if(isdigit(ch)) {
     tok->type = INTEGER;
     tok->val.int_val = ch - '0';
-    while(isdigit(ch = getc(stdin))) {
+    while(isdigit(ch = getc(f))) {
       tok->val.int_val = tok->val.int_val*10 + ch - '0';
     }
-    ungetc(ch, stdin);
+    ungetc(ch, f);
     return;
   }
 
@@ -89,11 +89,11 @@ void read_one_token(Token *tok)
   }
 
   if(ch == ':') {
-    if ((ch = getc(stdin)) == '=') {
+    if ((ch = getc(f)) == '=') {
       tok->type = ASSIGN_OP;
       return;
     } else {
-      ungetc(ch, stdin);
+      ungetc(ch, f);
     }
   }
 
@@ -101,11 +101,11 @@ void read_one_token(Token *tok)
     int ind = 0;
     tok->type = IDENT;
     tok->val.ident[ind] = ch;
-    while(isalpha(ch=getc(stdin))) {
+    while(isalpha(ch=getc(f))) {
       ind +=1;
       tok->val.ident[ind] = ch;
     }
-    ungetc(ch, stdin);
+    ungetc(ch, f);
     tok->val.ident[ind+1] = '\0';
     // printf("Lex Ident: %s\n", tok->val.ident);
     if (!strcmp(tok->val.ident, "int")) {

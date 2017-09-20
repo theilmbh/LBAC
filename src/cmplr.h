@@ -2,7 +2,6 @@
 #define CMPLR_H
 
 #define MAXIDENT 256
-#define MAXSYM   256
 
 #include <stdio.h>
 
@@ -42,13 +41,6 @@ typedef struct Node {
     struct Node *left;
     struct Node *right;
 } Node;
-
-typedef struct Symbol {
-    char name[MAXIDENT];
-    Node *expr;
-} Symbol;
-
-Symbol *symtab[MAXSYM];
 
 void read_one_token(Token * tok, FILE * f);
 void print_token(Token * tok);

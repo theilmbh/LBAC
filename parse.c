@@ -326,59 +326,57 @@ Node *expand(Node * ast)
 {
 
     Node *out, *al;
+    switch ( ast-> type ) {
+        case VAR:
+        case INT:
+            out = ast;
+            break;
 
-    /* if node is int or var, just return it */
-    if (ast->type == VAR || ast->type == INT) {
-	return ast;
+        case BIN_OP_PLUS:
+        case BIN_OP_MINUS:
+            ast->left = expand(ast->left);
+            ast->right = expand(ast->right);
+            out = ast;
+            break;
+        
+        case PAREN:
+            ast->right = expand(ast->right);
+            out = ast;
+            break;
+
+        case BIN_OP_TIMES:
+            if (ast->right->type == BIN_OP_PLUS) {
+                al = expand(ast->left);
+                out =
+                    plus_node(expand(times_node(al, expand(ast->right->left))),
+                              expand(times_node
+                                     (al, expand(ast->right->right))));
+                return out;
+            }
+            if (ast->left->type == BIN_OP_PLUS) {
+                al = expand(ast->right);
+                out =
+                    plus_node(expand(times_node(expand(ast->left->left), al)),
+                              expand(times_node
+                                     (expand(ast->left->right), al)));
+                return out;
+            }
+
+            /* Expand Children */
+            ast->left = expand(ast->left);
+            ast->right = expand(ast->right);
+
+            /* check to see if we can distribute further */
+            if (ast->left->type == BIN_OP_PLUS
+                || ast->right->type == BIN_OP_PLUS) {
+                return expand(ast);
+            }
+            /* return expanded node */
+            return ast;
+            break;
     }
-
-    /* If node is add, expand children */
-    if (ast->type == BIN_OP_PLUS || ast->type == BIN_OP_MINUS) {
-	ast->left = expand(ast->left);
-	ast->right = expand(ast->right);
-	return ast;
-    }
-
-    /* if node is multiply, rewrite */
-    if (ast->type == BIN_OP_TIMES) {
-	if (ast->right->type == BIN_OP_PLUS) {
-	    al = expand(ast->left);
-	    out =
-		plus_node(expand(times_node(al, expand(ast->right->left))),
-			  expand(times_node
-				 (al, expand(ast->right->right))));
-	    return out;
-	}
-	if (ast->left->type == BIN_OP_PLUS) {
-	    al = expand(ast->right);
-	    out =
-		plus_node(expand(times_node(expand(ast->left->left), al)),
-			  expand(times_node
-				 (expand(ast->left->right), al)));
-	    return out;
-	}
-
-	/* Expand Children */
-	ast->left = expand(ast->left);
-	ast->right = expand(ast->right);
-
-	/* check to see if we can distribute further */
-	if (ast->left->type == BIN_OP_PLUS
-	    || ast->right->type == BIN_OP_PLUS) {
-	    return expand(ast);
-	}
-	/* return expanded node */
-	return ast;
-    }
-
-    /* If we have a parenthetical expression,
-     * expand the right branch.  The left is NULL */
-    if (ast->type == PAREN) {
-        ast->right = expand(ast->right);
-    }
-
     /* fall through */
-    return ast;
+    return out;
 }
 
 int evaluate(Node * ast)

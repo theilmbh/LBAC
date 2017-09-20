@@ -77,6 +77,16 @@ Node *negate(Node * n)
     return times_node(integer_node(-1), n);
 }
 
+Node *paren_node(Node * expr) 
+{
+    Node *out = malloc(sizeof(Node));
+    out->type = PAREN;
+    out->value = 0;
+    out->left = NULL;
+    out->right = expr;
+    return out;
+}
+
 Node *plus_node(Node * l, Node * r)
 {
     Node *out = malloc(sizeof(Node));
@@ -161,7 +171,7 @@ Node *factor()
 	match(L_PAREN);
 	out = expression();
 	match(R_PAREN);
-	return out;
+	return paren_node(out);
     } else if (tok->type == IDENT) {
 	/* Variable */
 	out = var_node(tok->val.ident);
@@ -269,6 +279,10 @@ Node *parse()
 Node *rewrite_minus(Node * ast)
 {
     /* Rewrite a - b as a + -1*b */
+    if (ast == NULL) {
+        return NULL;
+    }
+
     if (ast->type == INT || ast->type == VAR) {
 	return ast;
     }
@@ -288,6 +302,10 @@ Node *reorder_coeff(Node * ast)
 {
     /* Reorders coefficients so that integers are on left */
     Node *tmp;
+    if (ast == NULL) {
+        return NULL;
+    }
+
     if (ast->type == INT || ast->type == VAR) {
 	return ast;
     }
@@ -353,6 +371,12 @@ Node *expand(Node * ast)
 	return ast;
     }
 
+    /* If we have a parenthetical expression,
+     * expand the right branch.  The left is NULL */
+    if (ast->type == PAREN) {
+        ast->right = expand(ast->right);
+    }
+
     /* fall through */
     return ast;
 }
@@ -368,6 +392,10 @@ int evaluate(Node * ast)
 
     if (ast->type == INT) {
 	return ast->value;
+    }
+
+    if (ast->type == PAREN) {
+        return evaluate(ast->right);
     }
 
     switch (ast->type) {
@@ -386,6 +414,10 @@ int evaluate(Node * ast)
 
 Node *attach_variables(Node * ast)
 {
+    if (ast == NULL) {
+        return NULL;
+    }
+
     if (ast->type == VAR) {
 	Symbol *sym = find_symbol(ast);
 	return attach_variables(sym->expr);

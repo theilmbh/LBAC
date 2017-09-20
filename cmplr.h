@@ -31,7 +31,8 @@ typedef enum ast_node_t {
     BIN_OP_MINUS,
     BIN_OP_DIVIDE,
     INT,
-    VAR
+    VAR,
+    PAREN
 } ast_node_t;
 
 typedef struct Node {

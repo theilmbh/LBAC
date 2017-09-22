@@ -88,6 +88,16 @@ void read_one_token(Token * tok, FILE * f)
 	return;
     }
 
+    if (ch == '{') {
+        tok->type = L_CURLY;
+        return;
+    }
+
+    if (ch == '}') {
+        tok->type = R_CURLY;
+        return;
+    }
+
     if (ch == ':') {
 	if ((ch = getc(f)) == '=') {
 	    tok->type = ASSIGN_OP;
@@ -107,10 +117,12 @@ void read_one_token(Token * tok, FILE * f)
 	}
 	ungetc(ch, f);
 	tok->val.ident[ind + 1] = '\0';
-	// printf("Lex Ident: %s\n", tok->val.ident);
 	if (!strcmp(tok->val.ident, "int")) {
 	    tok->type = KW_INT;
 	}
+        if (!strcmp(tok->val.ident, "def")) {
+            tok->type = KW_DEF;
+        }
 	return;
     }
 

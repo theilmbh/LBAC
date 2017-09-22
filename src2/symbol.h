@@ -24,15 +24,32 @@
 
 #define MAXSYM 256
 
+union symbol_type { VAR_LOCAL, VAR, FUNC };
+
 typedef struct Symbol {
     char name[MAXIDENT];
-    Node *expr;
+    union symbol_type type;
+    unsigned int addr;
 } Symbol;
 
-Symbol *symtab[MAXSYM];
+struct env {
+    struct env *prev;
+    int symcount;
+    Symbol *symtab[MAXSYM];
+};
 
-int check_symbol(char *);
+/* Create a new environment (variable scope)
+ * Chain the new environment to the environment prev */
+struct env *create_env(struct env *prev);
+
+/* Check to see if a symbol is already defined
+ * in the environment  */
+int check_symbol(struct env *, char *);
+
+/*  Return the Symbol table entry for a specific node */
 Symbol *find_symbol(Node *);
-void add_symbol(Node *, Node *);
+
+/* Add a symbol to the current environment if possible */
+void add_symbol(struct env *, Node *, Node *);
 
 #endif

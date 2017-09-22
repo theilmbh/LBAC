@@ -26,17 +26,35 @@
 
 static int symcount = 0;
 
-int check_symbol(char *nm)
+/* Create a new environment (variable scope)
+ * Chain the new environment to the environment prev */
+struct env *create_env(struct env *prev)
+{
+    struct env *out = malloc(sizeof(struct env));
+    out->prev = prev;
+    out->symcount = 0;
+    return out;
+}
+
+
+int check_symbol(struct env *e, char *nm)
 {
     /* Check if a symbol is already
      * defined in the symbol table */
-    int i;
-    for (i = 0; i < symcount; i++) {
-	if (!strcmp(symtab[i]->name, nm)) {
-	    return 1;
-	}
+    int i, found = 0;
+    while (found == 0) {
+        for (i = 0; i < e->symcount; i++) {
+            if (!strcmp(e->symtab[i]->name, nm)) {
+                found = 1;
+            }
+        }
+        if (e->prev == NULL) {
+            /* We've reached the end of the tables */
+            break;
+        }
+        e = e->prev;
     }
-    return 0;
+    return found;
 }
 
 Symbol *find_symbol(Node * n)

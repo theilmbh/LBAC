@@ -24,5 +24,9 @@
 Node *factor();
 Node *expression();
 Node *term();
+Node *assignment();
+Node *function_declaration();
+Node *args();
+
 
 #endif

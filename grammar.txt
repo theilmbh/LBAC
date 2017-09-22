@@ -1,9 +1,13 @@
 statement -> assignment statement | expression
 expression -> term + expression  | term - expression | term
 term -> factor * term | factor / term | factor
-factor -> integer | variable | "(" expression ")"
+factor -> integer | variable | "(" expression ")" | id(e1, e2, e3, ..., en)
 
+declaration -> function_declaration | assignment
 assignment -> "int" variable ":=" expression ";" {add var to symtab}
+
+function_declaration -> "def" ident "(" args ")" "{" expression "}"
+
 
 evaluate(ast)
 

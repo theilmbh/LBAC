@@ -73,17 +73,17 @@ Symbol *find_symbol(Node * n)
 
 /* Add a symbol to the symbol table. 
  * Print Error and exit if symbol is already defined */
-void add_symbol(Node * var, Node * expr)
+void add_symbol(struct env * e, char * nm, enum symbol_type type)
 {
 
-    if (check_symbol(var->name)) {
+    if (check_symbol(e, var->name)) {
 	printf("Symbol %s already declared. Terminating.\n", var->name);
 	exit(-1);
     }
     Symbol *sym = malloc(sizeof(Symbol));
     strcpy(sym->name, var->name);
     sym->expr = expr;
-    symtab[symcount] = sym;
-    symcount++;
+    e->symtab[e->symcount] = sym;
+    e->symcount++;
 }
 

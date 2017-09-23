@@ -24,11 +24,11 @@
 
 #define MAXSYM 256
 
-union symbol_type { VAR_LOCAL, VAR, FUNC };
+enum symbol_type { VAR_LOCAL, VAR, FUNC };
 
 typedef struct Symbol {
     char name[MAXIDENT];
-    union symbol_type type;
+    enum symbol_type type;
     unsigned int addr;
 } Symbol;
 
@@ -50,6 +50,6 @@ int check_symbol(struct env *, char *);
 Symbol *find_symbol(Node *);
 
 /* Add a symbol to the current environment if possible */
-void add_symbol(struct env *, Node *, Node *);
+void add_symbol(struct env * e, char * nm, enum symbol_type type);
 
 #endif

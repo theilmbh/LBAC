@@ -26,8 +26,54 @@ void match(token_t type)
     }
 }
 
+int expect(token_t type)
+{
+    /* check if token is what we expect it to be */
+    if (tok->type == type) {
+        return 1;
+    } else {
+        printf("Syntax Error!\n");
+        exit(-1);
+    }
+}
 
 /* Grammar functions corresponding to Nonterminals */
+Node *function_declaration(struct env * e)
+{
+    Node *out = NULL;
+    if (expect(IDENT)) {
+        struct env *new_e = create_env(e);
+        Node *func_name = var_node(tok->val.ident);
+        match(IDENT);
+        match(L_PAREN);
+        Node *func_arglist = args(new_e);
+        match(R_PAREN);
+        match(L_CURLY);
+        Node *func_body = expression(new_e);
+        match(R_CURLY);
+        return func_decl_node(func_name, func_arglist, func_body, new_e);
+    }
+}
+
+Node *args(struct env *e)
+{
+    Node *out = NULL;
+    if (expect(IDENT)) {
+        Node *x = var_node(tok->val.ident);
+        match(IDENT);
+        add_symbol(e, x->name, LOCAL_VAR);
+
+        if (tok->type == COMMA) {
+            match(COMMA);
+            Node *y = args(e);
+            out = args_node(x, y);
+        } else {
+            out = args_node(x, NULL);
+        }
+    }
+    return out;
+}
+
 Node *factor()
 {
     // printf("factor\n");

@@ -20,13 +20,13 @@
 #define PARSE_H
 
 #include "ast.h"
+#include "symbol.h"
 
-Node *factor();
-Node *expression();
-Node *term();
-Node *assignment();
-Node *function_declaration();
-Node *args();
-
+Node *factor(struct env *);
+Node *expression(struct env *);
+Node *term(struct env *);
+Node *assignment(struct env *);
+Node *function_declaration(struct env *);
+Node *args(struct env *);
 
 #endif

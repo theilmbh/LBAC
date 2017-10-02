@@ -151,17 +151,17 @@ Node *expression()
     return ph;
 }
 
-void assignment()
+void assignment(struct env * e)
 {
     Node *var, *expr;
     match(KW_INT);
     if (tok->type == IDENT) {
+	add_symbol(e, tok->val.ident, VAR_LOCAL);
 	var = var_node(tok->val.ident);
 	match(IDENT);
 	match(ASSIGN_OP);
 	expr = expression();
 	match(SEMICOLON);
-	add_symbol(var, expr);
     }
 }
 

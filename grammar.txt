@@ -10,6 +10,9 @@ function_declaration -> "def" ident "(" args ")" "{" expression "}"
 
 args -> ident, args | ident
 
+Local variables are allocated on the stack,
+Global variables are allocated in bss?
+
 evaluate(ast)
 
 1 + 2 + 3

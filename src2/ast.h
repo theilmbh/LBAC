@@ -20,6 +20,7 @@
 #define AST_H
 
 #include "cmplr.h"
+#include "symbol.h"
 
 typedef enum ast_node_t {
     BIN_OP_PLUS,
@@ -28,23 +29,31 @@ typedef enum ast_node_t {
     BIN_OP_DIVIDE,
     INT,
     VAR,
-    PAREN
+    PAREN,
+    STMT,
+    DECL,
+    FUNC_DECL
 } ast_node_t;
 
 typedef struct Node {
     ast_node_t type;
     int value;
     char name[MAXIDENT];
+    struct env *e;
     struct Node *left;
     struct Node *right;
 } Node;
 
-Node *paren_node(Node * expr);
-Node *var_node(char *var_name);
-Node *plus_node(Node * l, Node * r);
-Node *times_node(Node * l, Node * r);
-Node *minus_node(Node * l, Node * r);
-Node *integer_node(int val);
-Node *divide_node(Node * l, Node * r);
+Node *paren_node(Node * expr, struct env *e);
+Node *var_node(char *var_name, struct env *e);
+Node *plus_node(Node * l, Node * r, struct env *e);
+Node *times_node(Node * l, Node * r, struct env *e);
+Node *minus_node(Node * l, Node * r, struct env *e);
+Node *integer_node(int val, struct env *e);
+Node *divide_node(Node * l, Node * r, struct env *e);
+Node *stmt_node(Node * l, Node * r, struct env *e);
+Node *decl_node(Node * s, struct env *e);
+Node *func_decl_node(Node * nm, Node * args, Node * body, struct env *e);
+Node *func_call_node(Node * nm, Node * args_list, struct env *e);
 
 #endif

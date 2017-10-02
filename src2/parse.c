@@ -42,6 +42,8 @@ Node *function_declaration(struct env * e)
 {
     Node *out = NULL;
     if (expect(IDENT)) {
+        /* We are entering a new function
+         * Make a new variable scope and attach to the previous scope */
         struct env *new_e = create_env(e);
         Node *func_name = var_node(tok->val.ident);
         match(IDENT);

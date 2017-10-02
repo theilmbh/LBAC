@@ -24,12 +24,17 @@
 
 #define MAXSYM 256
 
-enum symbol_type { VAR_LOCAL, VAR, FUNC };
+enum symbol_type { 
+    VAR_LOCAL, /* Locally defined variable (e.g function param) */
+    VAR,       /* Global Variables */ 
+    FUNC      /* Function Declarations */ 
+};
 
 typedef struct Symbol {
     char name[MAXIDENT];
     enum symbol_type type;
-    unsigned int addr;
+    unsigned int addr;  /* If this is a local variable, gives position 
+                           on stack.  If global, gives absolute address */
 } Symbol;
 
 struct env {
@@ -44,10 +49,10 @@ struct env *create_env(struct env *prev);
 
 /* Check to see if a symbol is already defined
  * in the environment  */
-int check_symbol(struct env *, char *);
+int check_symbol(struct env * e, char * nm);
 
 /*  Return the Symbol table entry for a specific node */
-Symbol *find_symbol(Node *);
+Symbol *find_symbol(Node * n);
 
 /* Add a symbol to the current environment if possible */
 void add_symbol(struct env * e, char * nm, enum symbol_type type);

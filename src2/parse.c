@@ -41,11 +41,13 @@ int expect(token_t type)
 Node *function_declaration(struct env * e)
 {
     Node *out = NULL;
+    match(KW_DEF);
     if (expect(IDENT)) {
         /* We are entering a new function
          * Make a new variable scope and attach to the previous scope */
         struct env *new_e = create_env(e);
         Node *func_name = var_node(tok->val.ident);
+        add_symbol(new_e, tok->val.ident, FUNC);
         match(IDENT);
         match(L_PAREN);
         Node *func_arglist = args(new_e);
@@ -151,31 +153,29 @@ Node *expression()
     return ph;
 }
 
-void assignment(struct env * e)
+/* Ignoring this for now 
+void assignment()
 {
     Node *var, *expr;
     match(KW_INT);
     if (tok->type == IDENT) {
-	add_symbol(e, tok->val.ident, VAR_LOCAL);
 	var = var_node(tok->val.ident);
 	match(IDENT);
 	match(ASSIGN_OP);
 	expr = expression();
 	match(SEMICOLON);
+	add_symbol(var, expr);
     }
-}
+}*/
 
-Node *statement()
+Node *statement(struct env *e)
 {
-
-    Node *out = NULL;
-    if (tok->type == KW_INT) {
-	assignment();
-	out = statement();
-    } else {
-	out = expression();
+    Node *out = NULL, *stmt2 = NULL;
+    Node *stmt = function_declaration(e);
+    if (tok->type != ENDA) {
+        Node *stmt2 = function_declaration(e);
     }
-    return out;
+    return stmt_node(stmt, stmt2, e);
 }
 
 /* Main Parsing Routine */

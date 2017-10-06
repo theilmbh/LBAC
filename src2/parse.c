@@ -173,7 +173,7 @@ Node *statement(struct env *e)
     Node *out = NULL, *stmt2 = NULL;
     Node *stmt = function_declaration(e);
     if (tok->type != ENDA) {
-        Node *stmt2 = function_declaration(e);
+        stmt2 = statement(e);
     }
     return stmt_node(stmt, stmt2, e);
 }

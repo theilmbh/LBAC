@@ -17,9 +17,29 @@
  */
 
 #include <string.h>
+#include "symbol.h"
 #include "ast.h"
-#include "algebra.h"
 #include <stdlib.h>
+
+const char* node_types[] = {
+    "PLUS",
+    "TIMES",
+    "MINUS",
+    "DIVIDE",
+    "INT",
+    "VAR",
+    "PAREN",
+    "STMT",
+    "DECL",
+    "FUNC_DECL",
+    "ARGS"
+};
+
+
+Node *negate(Node * n, struct env *e)
+{
+    return times_node(integer_node(-1, e), n, e);
+}
 
 Node *paren_node(Node * expr, struct env *e) 
 {
@@ -56,9 +76,9 @@ Node *plus_node(Node * l, Node * r, struct env *e)
 Node *minus_node(Node * l, Node * r, struct env *e)
 {
     if (r->type == BIN_OP_PLUS || r->type == BIN_OP_MINUS ) {
-        return plus_node(l, plus_node(negate(r->left), r->right, e), e);
+        return plus_node(l, plus_node(negate(r->left, e), r->right, e), e);
     } else {
-        return plus_node(l, negate(r), e);
+        return plus_node(l, negate(r, e), e);
     }
 }
 
@@ -137,4 +157,12 @@ Node *func_decl_node(Node * nm, Node * body, struct env *e)
     return out;
 }
 
-
+Node * args_node(Node * l, Node * r, struct env *e)
+{
+    Node *out = malloc(sizeof(Node));
+    out->type = ARGS;
+    out->left = l;
+    out->right = r;
+    out->e = e;
+    return out;
+}

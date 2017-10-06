@@ -98,6 +98,11 @@ void read_one_token(Token * tok, FILE * f)
         return;
     }
 
+    if (ch == ',') {
+        tok->type = COMMA;
+        return;
+    }
+
     if (ch == ':') {
 	if ((ch = getc(f)) == '=') {
 	    tok->type = ASSIGN_OP;

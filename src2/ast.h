@@ -22,6 +22,8 @@
 #include "cmplr.h"
 #include "symbol.h"
 
+extern const char* node_types[];
+
 typedef enum ast_node_t {
     BIN_OP_PLUS,
     BIN_OP_TIMES,
@@ -32,7 +34,8 @@ typedef enum ast_node_t {
     PAREN,
     STMT,
     DECL,
-    FUNC_DECL
+    FUNC_DECL,
+    ARGS
 } ast_node_t;
 
 typedef struct Node {
@@ -53,7 +56,8 @@ Node *integer_node(int val, struct env *e);
 Node *divide_node(Node * l, Node * r, struct env *e);
 Node *stmt_node(Node * l, Node * r, struct env *e);
 Node *decl_node(Node * s, struct env *e);
-Node *func_decl_node(Node * nm, Node * args, Node * body, struct env *e);
+Node *func_decl_node(Node * nm, Node * body, struct env *e);
 Node *func_call_node(Node * nm, Node * args_list, struct env *e);
+Node *args_node(Node * l, Node * r, struct env *e);
 
 #endif

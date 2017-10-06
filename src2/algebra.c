@@ -29,9 +29,9 @@
 
 /* Negate a node
  * by multiplying by -1 */
-Node *negate(Node * n)
+Node *negate(Node * n, struct env *e)
 {
-    return times_node(integer_node(-1), n);
+    return times_node(integer_node(-1, e), n, e);
 }
 
 Node *rewrite_minus(Node * ast)

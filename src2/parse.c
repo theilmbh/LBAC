@@ -4,10 +4,10 @@
 #include <string.h>
 
 #include "cmplr.h"
-#include "algebra.h"
 #include "symbol.h"
 #include "ast.h"
 #include "parse.h"
+#include "algebra.h"
 
 /* Current Token */
 Token *tok;
@@ -46,7 +46,7 @@ Node *function_declaration(struct env * e)
         /* We are entering a new function
          * Make a new variable scope and attach to the previous scope */
         struct env *new_e = create_env(e);
-        Node *func_name = var_node(tok->val.ident);
+        Node *func_name = var_node(tok->val.ident, e);
         add_symbol(new_e, tok->val.ident, FUNC);
         match(IDENT);
         match(L_PAREN);
@@ -55,7 +55,7 @@ Node *function_declaration(struct env * e)
         match(L_CURLY);
         Node *func_body = expression(new_e);
         match(R_CURLY);
-        return func_decl_node(func_name, func_arglist, func_body, new_e);
+        return func_decl_node(func_name, func_body, new_e);
     }
 }
 
@@ -63,39 +63,39 @@ Node *args(struct env *e)
 {
     Node *out = NULL;
     if (expect(IDENT)) {
-        Node *x = var_node(tok->val.ident);
+        Node *x = var_node(tok->val.ident, e);
         match(IDENT);
-        add_symbol(e, x->name, LOCAL_VAR);
+        add_symbol(e, x->name, VAR_LOCAL);
 
         if (tok->type == COMMA) {
             match(COMMA);
             Node *y = args(e);
-            out = args_node(x, y);
+            out = args_node(x, y, e);
         } else {
-            out = args_node(x, NULL);
+            out = args_node(x, NULL, e);
         }
     }
     return out;
 }
 
-Node *factor()
+Node *factor(struct env *e)
 {
     // printf("factor\n");
     Node *out = NULL;
     /* Just a plain integer */
     if (tok->type == INTEGER) {
-	out = integer_node(tok->val.int_val);
+	out = integer_node(tok->val.int_val, e);
 	match(INTEGER);
 	return out;
     } else if (tok->type == L_PAREN) {
 	/* parenthetical expression */
 	match(L_PAREN);
-	out = expression();
+	out = expression(e);
 	match(R_PAREN);
-	return paren_node(out);
+	return paren_node(out, e);
     } else if (tok->type == IDENT) {
 	/* Variable */
-	out = var_node(tok->val.ident);
+	out = var_node(tok->val.ident, e);
 	match(IDENT);
 	return out;
     } else {
@@ -105,49 +105,49 @@ Node *factor()
     }
 }
 
-Node *term()
+Node *term(struct env *e)
 {
     /* parse a term */
     Node *out = NULL;
 
     /* First, parse any factors */
-    out = factor();
+    out = factor(e);
 
     /* Times operation */
     if (tok->type == OP && tok->val.op == MULTIPLY) {
 	match(OP);
-	out = times_node(out, term());
+	out = times_node(out, term(e), e);
 	return out;
     }
 
     /* Divide operation */
     if (tok->type == OP && tok->val.op == DIVIDE) {
 	match(OP);
-	out = divide_node(out, term());
+	out = divide_node(out, term(e), e);
 	return out;
     }
     return out;
 }
 
-Node *expression()
+Node *expression(struct env *e)
 {
 
     /* Parse an expression */
     Node *out = NULL;
     Node *ph = NULL;
-    ph = term();
+    ph = term(e);
 
     /* Plus operation */
     if (tok->type == OP && tok->val.op == PLUS) {
 	match(OP);
-	out = plus_node(ph, expression());
+	out = plus_node(ph, expression(e), e);
 	return out;
     }
 
     /* Minus Operation */
     if (tok->type == OP && tok->val.op == MINUS) {
 	match(OP);
-	out = minus_node(ph, expression());
+	out = minus_node(ph, expression(e), e);
 	return out;
     }
     return ph;
@@ -187,14 +187,15 @@ Node *parse()
 
     /* Load the lookahead with the first token */
     read_one_token(tok, source);
-    // print_token(tok);
+    print_token(tok);
 
     /* Let's go! */
-    ast = statement();
+    struct env *top = create_env(NULL);
+    ast = statement(top);
     return ast;
 }
 
-Node *attach_variables(Node * ast)
+/*  Node *attach_variables(Node * ast)
 {
     if (ast == NULL) {
         return NULL;
@@ -213,7 +214,7 @@ Node *attach_variables(Node * ast)
     ast->right = attach_variables(ast->right);
     return ast;
 }
-
+*/
 void print_expression(Node * ast)
 {
 
@@ -272,10 +273,15 @@ void print_node(FILE * out, Node * n, int indent)
     }
 }
 
+void print_node2(FILE * out, Node *n, int indent)
+{
+    fprintf(out, "%s\n", node_types[n->type]);
+}
+
 void print_ast(FILE * out, Node * n, int indent)
 {
     int i;
-    print_node(out, n, indent);
+    print_node2(out, n, indent);
     if (n->left != NULL) {
 	for (i = 0; i < indent; i++) {
 	    fprintf(out, " ");
@@ -302,15 +308,7 @@ int main(int argc, char **argv)
     }
 
     ast = parse();
-    printf("Attaching variables...\n");
-    ast1 = attach_variables(ast);
-    FILE *out = fopen("./ast.tree", "w");
-    print_ast(out, rewrite_minus(ast1), 0);
-
-    int v = evaluate(rewrite_minus(ast));
-    printf("Expression evaluated to: %d\n", v);
-
-
+    print_ast(stdout, ast, 0);
     //
     // printf("Rewrite Minus: \n");
     // ast = rewrite_minus(ast);
@@ -326,7 +324,6 @@ int main(int argc, char **argv)
     //
     // print_expression(ast);
     // printf("\n");
-    fclose(out);
     fclose(source);
     return 0;
 }

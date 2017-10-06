@@ -26,7 +26,7 @@
 
 enum symbol_type { 
     VAR_LOCAL, /* Locally defined variable (e.g function param) */
-    VAR,       /* Global Variables */ 
+    VAR_GLOBAL,       /* Global Variables */ 
     FUNC      /* Function Declarations */ 
 };
 
@@ -52,7 +52,7 @@ struct env *create_env(struct env *prev);
 int check_symbol(struct env * e, char * nm);
 
 /*  Return the Symbol table entry for a specific node */
-Symbol *find_symbol(Node * n);
+Symbol *find_symbol(Node * n, struct env *e);
 
 /* Add a symbol to the current environment if possible */
 void add_symbol(struct env * e, char * nm, enum symbol_type type);

@@ -4,13 +4,12 @@
 #define MAXIDENT 256
 
 #include <stdio.h>
-#include "ast.h"
 
 typedef enum token_t {
     INTEGER, OP, ENDA,
     L_PAREN, R_PAREN, IDENT,
     KW_INT, SEMICOLON, ASSIGN_OP,
-    KW_DEF, L_CURLY, R_CURLY
+    KW_DEF, L_CURLY, R_CURLY, COMMA
 } token_t;
 
 typedef enum op_t { PLUS, MULTIPLY, MINUS, DIVIDE } op_t;

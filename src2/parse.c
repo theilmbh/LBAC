@@ -108,7 +108,7 @@ Node *factor(struct env *e)
 	out = var_node(tok->val.ident, e);
 	match(IDENT);
 	/* if next token is paren, we have function call */
-        if (tok->type == L_PAREN) {
+        if (expect(L_PAREN)) {
 		out = function_call(out, e);
 	}
 	return out;

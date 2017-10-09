@@ -28,5 +28,6 @@ Node *term(struct env *);
 Node *assignment(struct env *);
 Node *function_declaration(struct env *);
 Node *args(struct env *);
+Node *function_call(struct env *);
 
 #endif

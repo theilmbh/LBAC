@@ -38,6 +38,16 @@ int expect(token_t type)
 }
 
 /* Grammar functions corresponding to Nonterminals */
+Node *function_call(Node * id_var, struct env * e)
+{
+    Node * out = NULL;
+    match(L_PAREN);
+    Node * params = function_params(e);
+    match(R_PAREN);
+    out = function_call_node(id_var, params, e);
+    return out;
+}
+
 Node *function_declaration(struct env * e)
 {
     Node *out = NULL;
@@ -97,6 +107,10 @@ Node *factor(struct env *e)
 	/* Variable */
 	out = var_node(tok->val.ident, e);
 	match(IDENT);
+	/* if next token is paren, we have function call */
+        if (tok->type == L_PAREN) {
+		out = function_call(out, e);
+	}
 	return out;
     } else {
 	/* IDK what we got */

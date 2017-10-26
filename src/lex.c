@@ -34,6 +34,10 @@ void read_one_token(Token * tok, FILE * f)
 {
     int ch;
     ch = getc(f);
+    if (ch == '\n') {
+        tok->type = ENDA;
+        return;
+    }
     while (isspace(ch)) {
 	ch = getc(f);
     }
@@ -118,6 +122,10 @@ void read_one_token(Token * tok, FILE * f)
 	printf("End of file?\n");
 	tok->type = ENDA;
 	return;
+    }
+    if (ch == '\n' || ch == '\r') {
+        tok->type = ENDA;
+        return;
     }
 
     printf("Lexing Error!\n");

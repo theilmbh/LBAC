@@ -65,6 +65,7 @@ Node *plus_node(Node * l, Node * r)
 
 Node *minus_node(Node * l, Node * r)
 {
+    return plus_node(l, times_node(integer_node(-1), r));
     if (r->type == BIN_OP_PLUS || r->type == BIN_OP_MINUS ) {
         return plus_node(l, plus_node(negate(r->left), r->right));
     } else {
@@ -127,7 +128,7 @@ Node *factor()
 	match(L_PAREN);
 	out = expression();
 	match(R_PAREN);
-	return paren_node(out);
+	return out;
     } else if (tok->type == IDENT) {
 	/* Variable */
 	out = var_node(tok->val.ident);
@@ -211,6 +212,9 @@ Node *statement()
 	out = statement();
     } else {
 	out = expression();
+    }
+    if (tok->type == ENDA) {
+        return out;
     }
     return out;
 }
@@ -306,41 +310,70 @@ void print_node(FILE * out, Node * n, int indent)
     case VAR:
 	fprintf(out, "P Varible: %s\n", n->name);
 	break;
+    case PAREN:
+        print_node(out, n->right, indent);
+        break;
     }
 }
 
-void print_ast(FILE * out, Node * n, int indent)
+void print_ast(FILE * out, Node * n, int indent, int levelmin, int levelmax)
 {
-    int i;
+    int i,j;
+    int iskip = 4;
     print_node(out, n, indent);
     if (n->left != NULL) {
-	for (i = 0; i < indent; i++) {
-	    fprintf(out, " ");
-	}
+        for (i = 0; i < levelmax; i++) {
+            if (i>levelmin) {
+                fprintf(out, "|");
+                iskip -=1;
+            }
+            for (j = 0; j < iskip; j++) {
+                fprintf(out, " ");
+            }
+        }
 	fprintf(out, "|-> ");
-	print_ast(out, n->left, indent + 4);
+	print_ast(out, n->left, indent + 4, levelmin, levelmax+1);
     }
+    iskip=4;
     if (n->right != NULL) {
-	for (i = 0; i < indent; i++) {
-	    fprintf(out, " ");
-	}
+        for (i = 0; i < levelmax; i++) {
+            if (i>levelmin) {
+                fprintf(out, "|");
+                iskip -=1;
+            }
+            for (j = 0; j < iskip; j++) {
+                fprintf(out, " ");
+            }
+        }
 	fprintf(out, "|-> ");
-	print_ast(out, n->right, indent + 4);
+	print_ast(out, n->right, indent + 4, levelmin+1, levelmax+1);
     }
 }
+
+#define PRINT_AST
 
 int main(int argc, char **argv)
 {
-    source = fopen(argv[1], "r");
+    //source = fopen(argv[1], "r");
+    source = stdin;
     Node *ast, *ast1;
-    ast = parse();
-    printf("Attaching variables...\n");
-    ast1 = attach_variables(ast);
-    FILE *out = fopen("./ast.tree", "w");
-    print_ast(out, rewrite_minus(ast1), 0);
+    int eval_num = 1;
+    printf(" ******** WELCOME TO ********\n");
+    printf(" ********   CASSIE   ********\n\n");
+    printf(" Copyright (c) 2017 Brad Theilman\n");
+    while (1) {
+        printf("In  [%d] :=> ", eval_num);
+        ast = parse();
+        //ast1 = attach_variables(ast);
+        //FILE *out = fopen("./ast.tree", "w");
+#ifdef PRINT_AST
+        print_ast(stdout, rewrite_minus(ast), 0, -1, 0);
+#endif
 
-    int v = evaluate(rewrite_minus(ast));
-    printf("Expression evaluated to: %d\n", v);
+        int v = evaluate(rewrite_minus(ast));
+        printf("\nOut [%d] :=> %d\n\n", eval_num, v);
+        eval_num++;
+    }
 
 
     //
@@ -358,7 +391,7 @@ int main(int argc, char **argv)
     //
     // print_expression(ast);
     // printf("\n");
-    fclose(out);
-    fclose(source);
+    //fclose(out);
+    //fclose(source);
     return 0;
 }

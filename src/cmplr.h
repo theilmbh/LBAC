@@ -53,5 +53,7 @@ Node *integer_node(int val);
 Node *factor();
 Node *expression();
 Node *term();
+Node *parse();
+Node *statement();
 
 #endif
